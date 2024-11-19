@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @submit.prevent="handleSubmit">
     <!-- v-model can be used on a component to implement a two-way binding. -->
     <!-- Two-way data binding means values are bound 2 ways between the template inputs and the component data itself and vise-versa-->
     <!-- Example: if you any data in an input it will automatically be the value in the component data 
@@ -8,8 +8,9 @@
     <input type="email" required v-model="email"/>
     
     <label>Password:</label> 
-    <input type="password" required v-model="password"/>
-    
+    <input type="password" required v-model="password" autocomplete="false"/>
+    <div v-if="passwordError" class="error">{{ passwordError }}</div>
+
     <!-- Select Boxes -->
     <label>Role:</label>
     <select v-model="role">
@@ -17,17 +18,23 @@
       <option value="designer">Web Designer</option>
     </select>
 
+    <!-- Keyboard events & keyboard event modifier -->
+    <label>Skills (press 'Enter' to add)</label>
+    <input type="text" v-model="tempSkill" @keyup.alt="addSKill"/> <!-- @keyup.alt="addSKill" - so the 'key will not be added in the array' -->
+    <div v-for="skill in skills" :key="skill" class="pill">
+      <span @click="deleteSkill(skill)">{{ skill }}</span>
+    </div>
     <!-- Checkbox -->
     <div class="terms">
       <input type="checkbox" v-model="terms" required>
       <label>Accept terms and conditions</label>
     </div>
 
+    <!-- Submit -->
+     <div class="submit">
+      <button>Create an account</button>
+     </div>
   </form>
-  <p>Email: {{ email }}</p>
-  <p>Password: {{ password }}</p>
-  <p>Role: {{ role }}</p>
-  <p>Terms accepted: {{ terms }}</p>
 </template>
 
 <script>
@@ -38,7 +45,37 @@ export default {
       password: '',
       role: 'designer',
       terms: false,
-      // names: []
+      tempSkill: '',
+      skills: [],
+      passwordError: false
+    }
+  },
+  methods: {
+    addSKill(e) {
+      if(e.key === 'Enter' && this.tempSkill) {
+        if(!this.skills.includes(this.tempSkill)) {
+          this.skills.push(this.tempSkill)
+        }
+        this.tempSkill = ''
+      }
+    },
+    deleteSkill(skill) {
+      this.skills = this.skills.filter((item) => {
+        return skill !== item
+      })
+    },
+    handleSubmit() {
+      // Validate password
+      this.passwordError = this.password.length > 5 ?
+        '' : 'Password must be at least 6 chars long'
+
+      if(!this.passwordError) {
+        console.log('email', this.email)
+        console.log('password', this.password)
+        console.log('role', this.role)
+        console.log('skills', this.skills)
+        console.log('terms accepted', this.terms)
+      }
     }
   }
 }
@@ -78,5 +115,34 @@ export default {
     margin: 0 10px 0 0;
     position: relative;
     top: 2px;
+  }
+  .pill {
+    display: inline-block;
+    margin: 20px 10px 0 0;
+    padding: 6px 12px;
+    background: #eee;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #777;
+    cursor: pointer;
+  }
+  button {
+    background: #0b6dff;
+    border: 0;
+    padding: 10px 20px;
+    margin-top: 20px;
+    color: white;
+    border-radius: 20px;
+  }
+  .submit {
+    text-align: center;
+  }
+  .error {
+    color: #ff0062;
+    margin-top: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
   }
 </style>
